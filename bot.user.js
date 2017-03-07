@@ -53,6 +53,9 @@ var customBotOptions = {
     // useDefaults: true
 };
 
+// gimme dat jquery
+var $ = unsafeWindow.jQuery;
+
 // Custom logging function - disabled by default
 window.log = function() {
     if (window.logDebugging) {
@@ -501,7 +504,7 @@ var bot = window.bot = (function() {
             snake_y = window.snake.yy;
 
             distance = Math.sqrt(canvasUtil.getDistance2(snake_x, snake_y, a_x, a_y));
-            
+
             if ((bot.LOCATION_MANAGEMENT == 1 && distance > 7625) || (bot.LOCATION_MANAGEMENT == 2 && distance > 15250)) {
                 window.goalCoordinates = {
                     x: a_x,
@@ -558,7 +561,7 @@ var bot = window.bot = (function() {
                     bot.collisionPoints[i].radius
                 );
 
-                if (bot.LimitEnemies == 0 || 
+                if (bot.LimitEnemies == 0 ||
                         (bot.LimitEnemies == 1 && canvasUtil.circleIntersect(fullHeadCircle, collisionCircle)) ||
                         (bot.LimitEnemies == 2 && canvasUtil.circleIntersect(headCircle, collisionCircle))) {
                     avoidingEnemies = true;
@@ -616,7 +619,7 @@ var bot = window.bot = (function() {
             if (!avoidingEnemies) {
                 return false;
             }
-            // Store as snakesAtAngles[0:114] = add score to each angle. 
+            // Store as snakesAtAngles[0:114] = add score to each angle.
             // Lowest score for 7 consecutive angles will be chosen.
             lowestAngle = 0;
             lowestScore = 9999999;
@@ -822,14 +825,14 @@ var bot = window.bot = (function() {
                 canvasUtil.drawLine(p1, p2, 'purple', 5)
             }
 
-            // TODO 
+            // TODO
             // 1. Compute Angle so we try to get in front of the snake
             //  Compute enemy snake angle by examining its points to create an angle
             // 2. Speed boost
             // 3. If killed, eat food.
-            // 4. Make sure no snake bodies are in the way of the target. 
+            // 4. Make sure no snake bodies are in the way of the target.
             // 4. a. choose different snake if blocked or opposite direction
-            
+
             window.goalCoordinates = {
                 x: closestEnemy.xx,
                 y: closestEnemy.yy
@@ -1321,7 +1324,7 @@ var bot = window.bot = (function() {
                     bot.foodTimeout = window.setTimeout(
                         bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
                 }
-            } 
+            }
             else if (bot.retreatToTargetRing()) {
                 bot.lookForFood = false;
                 if (bot.foodTimeout) {
@@ -2042,7 +2045,7 @@ var userInterface = window.userInterface = (function() {
     //     foodRoundSize: 5,
     //     foodRoundAngle: Math.PI / 8,
     //     foodSmallSize: 10,
-    //     rearHeadAngle: 3 * Math.PI / 4,  // 
+    //     rearHeadAngle: 3 * Math.PI / 4,  //
     //     rearHeadDir: Math.PI / 2,
     // }
 
