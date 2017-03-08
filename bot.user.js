@@ -1918,10 +1918,22 @@ var userInterface = window.userInterface = (function() {
                 foodDetection = Math.floor(Math.random()*(2-0+1)+0);
             }
             bot.FOOD_DETECTION = foodDetection;
-            // Food Ignored:
-            // Movement:
-            // Turn Angle:
-            // Speed Management:
+            // arcSize: (1-16) - 4
+            bot.opt.arcSize = Math.PI / (parseInt(chromosome.substring(14, 18), 2) + 1);
+            // foodAccelSize: (10-120) - 7
+            bot.opt.foodAccelSize = parseInt(chromosome.substring(18, 25), 2) + 10;
+            // foodAccelAngle: (1-16) - 4
+            bot.opt.foodAccelAngle = Math.PI / (parseInt(chromosome.substring(25, 29), 2) + 1);
+            // foodRoundSize: (3-15) - 4
+            bot.opt.foodRoundSize = parseInt(chromosome.substring(29, 33), 2) + 3;
+            // foodRoundAngle: (1-16) - 4
+            bot.opt.foodRoundAngle = Math.PI / (parseInt(chromosome.substring(33, 37), 2) + 3);
+            // foodSmallSize: (1-50) - 6
+            bot.opt.foodSmallSize = parseInt(chromosome.substring(37, 43), 2) + 1;
+            // rearHeadAngle: (1-10), (1-10) - 8
+            bot.opt.rearHeadAngle = (parseInt(chromosome.substring(43, 47), 2) + 1) * Math.PI / (parseInt(chromosome.substring(47, 51), 2) + 1);
+            // rearHeadDir: (1-10) - 4
+            bot.opt.rearHeadDir = Math.PI / (parseInt(chromosome.substring(51, 55), 2) + 1);
         },
 
         oefTimer: function() {
@@ -1945,6 +1957,14 @@ var userInterface = window.userInterface = (function() {
 
                 if (window.autoRespawn) {
                     // RESET BEHAVIOR to new chromosome
+                    chromosome = ''
+                    for (var i = 0; i < 55; i++) {
+                        num = Math.floor(Math.random()*(1-0+1)+0);
+                        chromosome += num.toString();
+                    }
+
+                    // userInterface.chromosomeSetup('01000101010000');
+                    userInterface.chromosomeSetup(chromosome);
                     window.connect();
                 }
             }
@@ -2104,8 +2124,14 @@ var userInterface = window.userInterface = (function() {
     //     rearHeadAngle: 3 * Math.PI / 4,  //
     //     rearHeadDir: Math.PI / 2,
     // }
+    chromosome = ''
+    for (var i = 0; i < 55; i++) {
+        num = Math.floor(Math.random()*(1-0+1)+0);
+        chromosome += num.toString();
+    }
 
-    userInterface.chromosomeSetup('01000101010000');
+    // userInterface.chromosomeSetup('01000101010000');
+    userInterface.chromosomeSetup(chromosome);
 
     // Start!
     userInterface.oefTimer();
