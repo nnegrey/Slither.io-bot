@@ -740,37 +740,6 @@ var bot = window.bot = (function() {
                     };
                     canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
                     return;
-                    // for (var pts = 0, lp = window.snakes[snake].pts.length; pts < lp; pts++) {
-                    //     if (!window.snakes[snake].pts[pts].dying &&
-                    //         canvasUtil.pointInRect({
-                    //             x: window.snakes[snake].pts[pts].xx,
-                    //             y: window.snakes[snake].pts[pts].yy
-                    //         }, bot.sectorBox)
-                    //     ) {
-                    //         var collisionPoint = {
-                    //             xx: window.snakes[snake].pts[pts].xx,
-                    //             yy: window.snakes[snake].pts[pts].yy,
-                    //             snake: snake,
-                    //             radius: bot.getSnakeWidth(window.snakes[snake].sc) / 2
-                    //         };
-
-                    //         if (window.visualDebugging && true === false) {
-                    //             canvasUtil.drawCircle(canvasUtil.circle(
-                    //                     collisionPoint.xx,
-                    //                     collisionPoint.yy,
-                    //                     collisionPoint.radius),
-                    //                 '#00FF00', false);
-                    //         }
-
-                    //         canvasUtil.getDistance2FromSnake(collisionPoint);
-                    //         bot.addCollisionAngle(collisionPoint);
-
-                    //         if (scPoint === undefined ||
-                    //             scPoint.distance > collisionPoint.distance) {
-                    //             scPoint = collisionPoint;
-                    //         }
-                    //     }
-                    // }
                 }
                 if (scPoint !== undefined) {
                     bot.collisionPoints.push(scPoint);
@@ -835,6 +804,98 @@ var bot = window.bot = (function() {
                 y: closestEnemy.yy
             };
             canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
+        },
+
+        checkForEncirclement: function() {
+            var scPoint;
+
+            bot.collisionPoints = [];
+            bot.collisionAngles = [];
+
+            for (var snake = 0, ls = window.snakes.length; snake < ls; snake++) {
+                scPoint = undefined;
+
+                if (window.snakes[snake].id !== window.snake.id &&
+                    window.snakes[snake].alive_amt === 1) {
+
+                    totalAngleValue = 0;
+                    y = window.snakes[snake].yy - window.snake.yy;
+                    x = window.snakes[snake].xx - window.snake.xx;
+                    angle = Math.atan(y / x) * 57.2958;
+                    if (x < 0 && y < 0) {
+                        angle += 180;
+                    }
+                    else if (x < 0) {
+                        angle += 180;
+                    }
+                    else if (y < 0) {
+                        angle += 360;
+                    }
+                    angle = 360 - angle;
+                    // currentAngle = canvasUtil.fastAtan2(Math.round(window.snakes[snake].yy - window.snake.yy),
+                    //                                     Math.round(window.snakes[snake].xx - window.snake.xx));
+                    currentAngle = angle;
+                    index = 0;
+
+                    for (var pts = 0, lp = window.snakes[snake].pts.length; pts < lp; pts++) {
+                        if (!window.snakes[snake].pts[pts].dying &&
+                            canvasUtil.pointInRect({
+                                x: window.snakes[snake].pts[pts].xx,
+                                y: window.snakes[snake].pts[pts].yy
+                            }, bot.sectorBox)
+                        ) {
+
+                            // nextAngle = canvasUtil.fastAtan2(Math.round(window.snakes[snake].pts[pts].yy - window.snake.yy),
+                            //                                  Math.round(window.snakes[snake].pts[pts].xx - window.snake.xx));
+                            y = window.snakes[snake].pts[pts].yy - window.snake.yy;
+                            x = window.snakes[snake].pts[pts].xx - window.snake.xx;
+                            angle = Math.atan(y / x) * 57.2958;
+                            if (x < 0 && y < 0) {
+                                angle += 180;
+                            }
+                            else if (x < 0) {
+                                angle += 180;
+                            }
+                            else if (y < 0) {
+                                angle += 360;
+                            }
+                            nextAngle = 360 - angle;
+                            totalAngleValue += nextAngle - currentAngle;
+                            currentAngle = nextAngle;
+                            index = pts;
+                            if (totalAngleValue > 180) {
+                                // scPoint = {
+                                //     xx: window.snakes[snake].pts[Math.floor(pts/2)].xx,
+                                //     yy: window.snakes[snake].pts[Math.floor(pts/2)].yy,
+                                //     snake: snake,
+                                //     radius: bot.getSnakeWidth(window.snakes[snake].sc) / 2
+                                // };
+
+                                // ang = canvasUtil.fastAtan2(Math.round(scPoint.yy - window.snake.yy),
+                                //                            Math.round(scPoint.xx - window.snake.xx));
+
+                                // canvasUtil.getDistance2FromSnake(scPoint);
+                                // bot.addCollisionAngle(scPoint);
+                                // if (window.visualDebugging) {
+                                //     canvasUtil.drawCircle(canvasUtil.circle(
+                                //             scPoint.xx,
+                                //             scPoint.yy,
+                                //             scPoint.radius),
+                                //         'red', false);
+                                // }
+                                // bot.avoidCollisionPoint(scPoint, ang)
+                                le = bot.LimitEnemies;
+                                bot.retreatFromEnemies();
+                                bot.LimitEnemies = le;
+                                window.setAcceleration(1);
+                                return true;
+                            }
+                            
+                        }
+                    }
+                }
+            }
+            return false;
         },
 
         // Avoid collision point by ang
@@ -1312,7 +1373,15 @@ var bot = window.bot = (function() {
                 // Turn Angle:
             // Location Management:
             // Speed Management:
-            if ((bot.ENEMY_AVOIDANCE == 0 && bot.checkCollision()) ||
+            if (bot.checkForEncirclement()) {
+                bot.lookForFood = false;
+                if (bot.foodTimeout) {
+                    window.clearTimeout(bot.foodTimeout);
+                    bot.foodTimeout = window.setTimeout(
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                }
+            }
+            else if ((bot.ENEMY_AVOIDANCE == 0 && bot.checkCollision()) ||
                     (bot.ENEMY_AVOIDANCE == 1 && bot.retreatFromEnemies()) ||
                     (bot.ENEMY_AVOIDANCE == 2 && bot.circleDefense())) {
                 bot.lookForFood = false;
@@ -1321,7 +1390,7 @@ var bot = window.bot = (function() {
                     bot.foodTimeout = window.setTimeout(
                         bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
                 }
-            } 
+            }
             else if (bot.retreatToTargetRing()) {
                 bot.lookForFood = false;
                 if (bot.foodTimeout) {
@@ -1858,25 +1927,11 @@ var userInterface = window.userInterface = (function() {
             original_oef();
             original_redraw();
 
-            // // Set AI Behaviors
-            // bot.standardBehavior = false;
-            // bot.circleBehavior = false;
-            // bot.retreatBehavior = false;
-            // bot.retreatFromEnemiesBehavior = false;
-            // bot.attackNearestEnemyBehavior = true;
-
             if (window.playing && bot.isBotEnabled && window.snake !== null) {
                 window.onmousemove = function() {};
                 bot.isBotRunning = true;
                 bot.go();
             } else if (bot.isBotEnabled && bot.isBotRunning) {
-                // RESET BEHAVIOR
-                // bot.standardBehavior = true;
-                // bot.circleBehavior = false;
-                // bot.retreatBehavior = false;
-                // bot.retreatFromEnemiesBehavior = false;
-                // bot.attackNearestEnemyBehavior = false;
-                // bot.isBotRunning = false;
                 if (window.lastscore && window.lastscore.childNodes[1]) {
                     bot.scores.push(parseInt(window.lastscore.childNodes[1].innerHTML));
                     bot.scores.sort(function(a, b) {
@@ -1886,6 +1941,7 @@ var userInterface = window.userInterface = (function() {
                 }
 
                 if (window.autoRespawn) {
+                    // RESET BEHAVIOR to new chromosome
                     window.connect();
                 }
             }
