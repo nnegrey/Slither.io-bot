@@ -71,20 +71,24 @@ var myId = makeid();
 
 
 function writeToDb(msgObject) {
-   $.ajax({
-     type: "POST",
-     url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
-     data: {
-        message: JSON.stringify(msgObject),
-        botId: myId
-     },
-     success: function() {
-        console.log("WE DID IT LADS");
-     },
-     error: function(jqXHR, textStatus, errorThrown) {
-         console.err( "OH NO AJAX ERROR: ", textStatus, errorThrown);
-     },
-   });
+   var funData = {
+     message: JSON.stringify(msgObject),
+     botId: myId
+  };
+
+  $.ajax({
+    type: "POST",
+    processData: false,
+    contentType: 'application/json',
+    url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
+    data: JSON.stringify(funData),
+    success: function() {
+      console.log("WE DID IT LADS");
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        console.error( "OH NO AJAX ERROR: ", textStatus, errorThrown);
+    },
+  });
 }
 
 // Custom logging function - disabled by default
