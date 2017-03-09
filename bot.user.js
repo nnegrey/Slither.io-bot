@@ -54,7 +54,34 @@ var customBotOptions = {
 };
 
 // gimme dat jquery
-var $ = unsafeWindow.jQuery;
+var $ = window.jQuery;
+
+function makeid() {
+   var text = "";
+   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+   for( var i=0; i < 5; i++ )
+   text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+   return text;
+}
+
+var myId = makeid();
+
+$.ajax({
+  type: "POST",
+  url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
+  data: {
+     message: "test message",
+     botId: myId
+  },
+  success: function() {
+     console.log("WE DID IT LADS");
+  },
+  error: function(jqXHR, textStatus, errorThrown) {
+      console.err( "OH NO AJAX ERROR: ", textStatus, errorThrown);
+  },
+});
 
 // Custom logging function - disabled by default
 window.log = function() {
