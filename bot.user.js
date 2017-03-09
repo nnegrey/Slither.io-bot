@@ -69,20 +69,23 @@ function makeid() {
 
 var myId = makeid();
 
-$.ajax({
-  type: "POST",
-  url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
-  data: {
-     message: "test message",
-     botId: myId
-  },
-  success: function() {
-     console.log("WE DID IT LADS");
-  },
-  error: function(jqXHR, textStatus, errorThrown) {
-      console.err( "OH NO AJAX ERROR: ", textStatus, errorThrown);
-  },
-});
+
+function writeToDb(msgObject) {
+   $.ajax({
+     type: "POST",
+     url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
+     data: {
+        message: JSON.stringify(msgObject),
+        botId: myId
+     },
+     success: function() {
+        console.log("WE DID IT LADS");
+     },
+     error: function(jqXHR, textStatus, errorThrown) {
+         console.err( "OH NO AJAX ERROR: ", textStatus, errorThrown);
+     },
+   });
+}
 
 // Custom logging function - disabled by default
 window.log = function() {
@@ -1805,6 +1808,7 @@ var userInterface = window.userInterface = (function() {
         },
 
         chromosomeSetup: function(chromosome) {
+            window.globalChromosome = chromosome;
             // Start Circle Size:
             circleSize = parseInt(chromosome.substring(0, 2), 2);
             if (circleSize == 0) { // 0 == Small
@@ -1905,7 +1909,6 @@ var userInterface = window.userInterface = (function() {
                 window.shouldUpdateStats = true;
                 bot.go();
             } else if (bot.isBotEnabled && bot.isBotRunning) {
-               console.log("AHAHAHA YOU DEAD");
                 // RESET BEHAVIOR
                 // bot.standardBehavior = true;
                 // bot.circleBehavior = false;
@@ -1914,12 +1917,15 @@ var userInterface = window.userInterface = (function() {
                 // bot.attackNearestEnemyBehavior = false;
                 // bot.isBotRunning = false;
                 if (window.lastscore && window.lastscore.childNodes[1] && window.shouldUpdateStats) {
-                    bot.scores.push(parseInt(window.lastscore.childNodes[1].innerHTML));
+                    var lastScore = parseInt(window.lastscore.childNodes[1].innerHTML);
+                    bot.scores.push(lastScore);
                     bot.scores.sort(function(a, b) {
                         return b - a;
                     });
                     userInterface.updateStats();
                     window.shouldUpdateStats = false;
+                    console.log("AHAHAHA YOU DEAD");
+                    writeToDb({chromosome: window.chromosome, score: lastScore})
                 }
 
                 if (window.autoRespawn) {
