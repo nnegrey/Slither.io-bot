@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ==UserScript==
 // @name         TEST_Slither.io-bot
+// @require http://code.jquery.com/jquery-1.12.4.min.js
 // @namespace    http://slither.io/
 // @version      1.2.9
 // @description  Slither.io bot
@@ -1452,10 +1453,10 @@ var userInterface = window.userInterface = (function() {
             statsOverlay.style.top = '340px';
             statsOverlay.style.width = '140px';
             statsOverlay.style.height = '210px';
-            // statsOverlay.style.background = 'rgba(0, 0, 0, 0.5)';
+            statsOverlay.style.background = 'rgba(0, 0, 0, 0.5)';
             statsOverlay.style.color = '#C0C0C0';
             statsOverlay.style.fontFamily = 'Consolas, Verdana';
-            statsOverlay.style.zIndex = 998;
+            statsOverlay.style.zIndex = 1998;
             statsOverlay.style.fontSize = '14px';
             statsOverlay.style.padding = '5px';
             statsOverlay.style.borderRadius = '5px';
@@ -1893,13 +1894,15 @@ var userInterface = window.userInterface = (function() {
             // bot.circleBehavior = false;
             // bot.retreatBehavior = false;
             // bot.retreatFromEnemiesBehavior = false;
-            // bot.attackNearestEnemyBehavior = true;
+            bot.attackNearestEnemyBehavior = true;
 
             if (window.playing && bot.isBotEnabled && window.snake !== null) {
                 window.onmousemove = function() {};
                 bot.isBotRunning = true;
+                window.shouldUpdateStats = true;
                 bot.go();
             } else if (bot.isBotEnabled && bot.isBotRunning) {
+               console.log("AHAHAHA YOU DEAD");
                 // RESET BEHAVIOR
                 // bot.standardBehavior = true;
                 // bot.circleBehavior = false;
@@ -1907,12 +1910,13 @@ var userInterface = window.userInterface = (function() {
                 // bot.retreatFromEnemiesBehavior = false;
                 // bot.attackNearestEnemyBehavior = false;
                 // bot.isBotRunning = false;
-                if (window.lastscore && window.lastscore.childNodes[1]) {
+                if (window.lastscore && window.lastscore.childNodes[1] && window.shouldUpdateStats) {
                     bot.scores.push(parseInt(window.lastscore.childNodes[1].innerHTML));
                     bot.scores.sort(function(a, b) {
                         return b - a;
                     });
                     userInterface.updateStats();
+                    window.shouldUpdateStats = false;
                 }
 
                 if (window.autoRespawn) {
