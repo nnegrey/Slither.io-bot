@@ -572,11 +572,6 @@ var bot = window.bot = (function() {
 
             bot.getCollisionPoints();
             if (bot.collisionPoints.length === 0) return false;
-
-            // angles = new Array(114);
-            // for (var i = 0; i < 114; i++) {
-            //     angles[i] = 0;
-            // }
             angles = new Array(bot.ANGLE_SIZE);
             for (var i = 0; i < bot.ANGLE_SIZE; i++) {
                 angles[i] = 0;
@@ -632,11 +627,6 @@ var bot = window.bot = (function() {
                         angle = Math.round((angle / 2) % 180);
                         opposite_angle = (angle + 90) % 180;
                     }
-
-                    // for (var j = -3; j < 8; j++) {
-                    //     angles[(angle+j)%114] += weight
-                    //     angles[(opposite_angle+1)%114] -= weight / 2;
-                    // }
                     for (var j = -3; j < 8; j++) {
                         angles[(angle+j)%bot.ANGLE_SIZE] += weight
                         angles[(opposite_angle+1)%bot.ANGLE_SIZE] -= weight / 2;
@@ -651,16 +641,6 @@ var bot = window.bot = (function() {
             // Lowest score for 7 consecutive angles will be chosen.
             lowestAngle = 0;
             lowestScore = 9999999;
-            // for (var i = 0; i < 114; i++) {
-            //     currentScore = angles[i];
-            //     for (var j = 1; j < 7; j++) {
-            //         currentScore += angles[(i+j)%114];
-            //     }
-            //     if (currentScore < lowestScore) {
-            //         lowestScore = currentScore;
-            //         lowestAngle = (i + 3) % 114;
-            //     }
-            // }
             for (var i = 0; i < bot.ANGLE_SIZE; i++) {
                 currentScore = angles[i];
                 for (var j = 1; j < 7; j++) {
@@ -690,10 +670,6 @@ var bot = window.bot = (function() {
                     y: window.snake.yy + (-500 * Math.sin(lowestAngle * 2 / 57.2958))
                 };
             }
-            // window.goalCoordinates = {
-            //     x: window.snake.xx + (500 * Math.cos(lowestAngle * Math.PI / 57.2958)),
-            //     y: window.snake.yy + (-500 * Math.sin(lowestAngle * Math.PI / 57.2958))
-            // };
             canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
             return true;
         },
@@ -771,37 +747,6 @@ var bot = window.bot = (function() {
                     };
                     canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
                     return;
-                    // for (var pts = 0, lp = window.snakes[snake].pts.length; pts < lp; pts++) {
-                    //     if (!window.snakes[snake].pts[pts].dying &&
-                    //         canvasUtil.pointInRect({
-                    //             x: window.snakes[snake].pts[pts].xx,
-                    //             y: window.snakes[snake].pts[pts].yy
-                    //         }, bot.sectorBox)
-                    //     ) {
-                    //         var collisionPoint = {
-                    //             xx: window.snakes[snake].pts[pts].xx,
-                    //             yy: window.snakes[snake].pts[pts].yy,
-                    //             snake: snake,
-                    //             radius: bot.getSnakeWidth(window.snakes[snake].sc) / 2
-                    //         };
-
-                    //         if (window.visualDebugging && true === false) {
-                    //             canvasUtil.drawCircle(canvasUtil.circle(
-                    //                     collisionPoint.xx,
-                    //                     collisionPoint.yy,
-                    //                     collisionPoint.radius),
-                    //                 '#00FF00', false);
-                    //         }
-
-                    //         canvasUtil.getDistance2FromSnake(collisionPoint);
-                    //         bot.addCollisionAngle(collisionPoint);
-
-                    //         if (scPoint === undefined ||
-                    //             scPoint.distance > collisionPoint.distance) {
-                    //             scPoint = collisionPoint;
-                    //         }
-                    //     }
-                    // }
                 }
                 if (scPoint !== undefined) {
                     bot.collisionPoints.push(scPoint);
@@ -866,6 +811,73 @@ var bot = window.bot = (function() {
                 y: closestEnemy.yy
             };
             canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
+        },
+
+        checkForEncirclement: function() {
+            var scPoint;
+
+            bot.collisionPoints = [];
+            bot.collisionAngles = [];
+
+            for (var snake = 0, ls = window.snakes.length; snake < ls; snake++) {
+                scPoint = undefined;
+
+                if (window.snakes[snake].id !== window.snake.id &&
+                    window.snakes[snake].alive_amt === 1) {
+
+                    totalAngleValue = 0;
+                    y = window.snakes[snake].yy - window.snake.yy;
+                    x = window.snakes[snake].xx - window.snake.xx;
+                    angle = Math.atan(y / x) * 57.2958;
+                    if (x < 0 && y < 0) {
+                        angle += 180;
+                    }
+                    else if (x < 0) {
+                        angle += 180;
+                    }
+                    else if (y < 0) {
+                        angle += 360;
+                    }
+                    angle = 360 - angle;
+                    currentAngle = angle;
+                    index = 0;
+
+                    for (var pts = 0, lp = window.snakes[snake].pts.length; pts < lp; pts++) {
+                        if (!window.snakes[snake].pts[pts].dying &&
+                            canvasUtil.pointInRect({
+                                x: window.snakes[snake].pts[pts].xx,
+                                y: window.snakes[snake].pts[pts].yy
+                            }, bot.sectorBox)
+                        ) {
+                            y = window.snakes[snake].pts[pts].yy - window.snake.yy;
+                            x = window.snakes[snake].pts[pts].xx - window.snake.xx;
+                            angle = Math.atan(y / x) * 57.2958;
+                            if (x < 0 && y < 0) {
+                                angle += 180;
+                            }
+                            else if (x < 0) {
+                                angle += 180;
+                            }
+                            else if (y < 0) {
+                                angle += 360;
+                            }
+                            nextAngle = 360 - angle;
+                            totalAngleValue += nextAngle - currentAngle;
+                            currentAngle = nextAngle;
+                            index = pts;
+                            if (totalAngleValue > 180) {
+                                le = bot.LimitEnemies;
+                                bot.retreatFromEnemies();
+                                bot.LimitEnemies = le;
+                                window.setAcceleration(1);
+                                return true;
+                            }
+
+                        }
+                    }
+                }
+            }
+            return false;
         },
 
         // Avoid collision point by ang
@@ -1333,17 +1345,17 @@ var bot = window.bot = (function() {
         // Main bot
         go: function() {
             bot.every();
-            // Circle Size Change:
             bot.getCircleSizeChange();
-            // Enemy Detection:
-                // Enemy Avoidance:
-            // Food Detection:
-                // Food Ignored:
-            // Movement:
-                // Turn Angle:
-            // Location Management:
-            // Speed Management:
-            if ((bot.ENEMY_AVOIDANCE == 0 && bot.checkCollision()) ||
+
+            if (bot.checkForEncirclement()) {
+                bot.lookForFood = false;
+                if (bot.foodTimeout) {
+                    window.clearTimeout(bot.foodTimeout);
+                    bot.foodTimeout = window.setTimeout(
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                }
+            }
+            else if ((bot.ENEMY_AVOIDANCE == 0 && bot.checkCollision()) ||
                     (bot.ENEMY_AVOIDANCE == 1 && bot.retreatFromEnemies()) ||
                     (bot.ENEMY_AVOIDANCE == 2 && bot.circleDefense())) {
                 bot.lookForFood = false;
@@ -1365,6 +1377,7 @@ var bot = window.bot = (function() {
                 bot.attackNearestEnemy();
             }
             else {
+                window.setAcceleration(bot.defaultAccel);
                 bot.lookForFood = true;
                 if (bot.foodTimeout === undefined) {
                     bot.foodTimeout = window.setTimeout(
@@ -1791,24 +1804,9 @@ var userInterface = window.userInterface = (function() {
             }
         },
 
-        getIntFromBin_2: function(binary) {
-            if (binary == '00') {
-                return 0;
-            }
-            else if (binary == '01') {
-                return 1;
-            }
-            else if (binary == '10') {
-                return 2;
-            }
-            else {
-                return 3;
-            }
-        },
-
         chromosomeSetup: function(chromosome) {
             // Start Circle Size:
-            circleSize = userInterface.getIntFromBin_2(chromosome.substring(0, 2));
+            circleSize = parseInt(chromosome.substring(0, 2), 2);
             if (circleSize == 0) { // 0 == Small
                 bot._circleSize = 5;
             }
@@ -1827,14 +1825,14 @@ var userInterface = window.userInterface = (function() {
             // 1 == Random
             // 2 == Width Based
             // 3 == Enemy Based
-            bot._circleSizeChange = userInterface.getIntFromBin_2(chromosome.substring(2, 4));
+            bot._circleSizeChange = parseInt(chromosome.substring(2, 4), 2);
 
             // Enemy Detection:
             // 0 == Detect All
             // 1 == Detect Enemies inside outer circle
             // 2 == Detect Enemies inside inner circle
             // 3 == Random Choice
-            limitEnemies = userInterface.getIntFromBin_2(chromosome.substring(4, 6));
+            limitEnemies = parseInt(chromosome.substring(4, 6), 2);
             if (limitEnemies == 3) {
                 limitEnemies = Math.floor(Math.random()*(2-0+1)+0);
             }
@@ -1844,13 +1842,13 @@ var userInterface = window.userInterface = (function() {
             // 1 == Best Exit Angle from Enemies
             // 2 == Circle Defense
             // 3 == Random Choice
-            enemyAvoidance = userInterface.getIntFromBin_2(chromosome.substring(6, 8));
+            enemyAvoidance = parseInt(chromosome.substring(6, 8), 2);
             if (enemyAvoidance == 3) {
                 enemyAvoidance = Math.floor(Math.random()*(2-0+1)+0);
             }
             bot.ENEMY_AVOIDANCE = enemyAvoidance;
             // Angle Avoidance:
-            angleSize = userInterface.getIntFromBin_2(chromosome.substring(8, 10));
+            angleSize = parseInt(chromosome.substring(8, 10), 2);
             if (angleSize == 3) {
                 angleSize = Math.floor(Math.random()*(2-0+1)+0);
             }
@@ -1867,20 +1865,32 @@ var userInterface = window.userInterface = (function() {
             // 1 == Inner Circle (Stay toward center of map)
             // 2 == Mid Circle (Stay betwen the edge and center of map)
             // 3 == Outer Circle (Stay near the edge of the map)
-            bot.LOCATION_MANAGEMENT = userInterface.getIntFromBin_2(chromosome.substring(10, 12));
+            bot.LOCATION_MANAGEMENT = parseInt(chromosome.substring(10, 12), 2);
             // Food Detection:
             // 0 == Combination of distance and size
             // 1 == Distance
             // 2 == Size
-            foodDetection = userInterface.getIntFromBin_2(chromosome.substring(12, 14));
+            foodDetection = parseInt(chromosome.substring(12, 14), 2);
             if (foodDetection == 3) {
                 foodDetection = Math.floor(Math.random()*(2-0+1)+0);
             }
             bot.FOOD_DETECTION = foodDetection;
-            // Food Ignored:
-            // Movement:
-            // Turn Angle:
-            // Speed Management:
+            // arcSize: (1-16) - 4
+            bot.opt.arcSize = Math.PI / (parseInt(chromosome.substring(14, 18), 2) + 1);
+            // foodAccelSize: (10-120) - 7
+            bot.opt.foodAccelSize = parseInt(chromosome.substring(18, 25), 2) + 10;
+            // foodAccelAngle: (1-16) - 4
+            bot.opt.foodAccelAngle = Math.PI / (parseInt(chromosome.substring(25, 29), 2) + 1);
+            // foodRoundSize: (3-15) - 4
+            bot.opt.foodRoundSize = parseInt(chromosome.substring(29, 33), 2) + 3;
+            // foodRoundAngle: (1-16) - 4
+            bot.opt.foodRoundAngle = Math.PI / (parseInt(chromosome.substring(33, 37), 2) + 3);
+            // foodSmallSize: (1-50) - 6
+            bot.opt.foodSmallSize = parseInt(chromosome.substring(37, 43), 2) + 1;
+            // rearHeadAngle: (1-10), (1-10) - 8
+            bot.opt.rearHeadAngle = (parseInt(chromosome.substring(43, 47), 2) + 1) * Math.PI / (parseInt(chromosome.substring(47, 51), 2) + 1);
+            // rearHeadDir: (1-10) - 4
+            bot.opt.rearHeadDir = Math.PI / (parseInt(chromosome.substring(51, 55), 2) + 1);
         },
 
         oefTimer: function() {
@@ -1888,13 +1898,6 @@ var userInterface = window.userInterface = (function() {
             canvasUtil.maintainZoom();
             original_oef();
             original_redraw();
-
-            // // Set AI Behaviors
-            // bot.standardBehavior = false;
-            // bot.circleBehavior = false;
-            // bot.retreatBehavior = false;
-            // bot.retreatFromEnemiesBehavior = false;
-            bot.attackNearestEnemyBehavior = true;
 
             if (window.playing && bot.isBotEnabled && window.snake !== null) {
                 window.onmousemove = function() {};
@@ -1920,6 +1923,15 @@ var userInterface = window.userInterface = (function() {
                 }
 
                 if (window.autoRespawn) {
+                    // RESET BEHAVIOR to new chromosome
+                    chromosome = ''
+                    for (var i = 0; i < 55; i++) {
+                        num = Math.floor(Math.random()*(1-0+1)+0);
+                        chromosome += num.toString();
+                    }
+
+                    // userInterface.chromosomeSetup('01000101010000');
+                    userInterface.chromosomeSetup(chromosome);
                     window.connect();
                 }
             }
@@ -2042,45 +2054,12 @@ var userInterface = window.userInterface = (function() {
     // Maintain fps
     setInterval(userInterface.framesPerSecond.fpsTimer, 80);
 
-    // Start Circle Size: (0 == Small, 1 == Medium, 2 == Large, 3 == Random)
-    // Circle Change Rate: (0 == Constant, 1 == Random, 2 == Width Based, 3 == Enemy Based)
-    // Enemy Detection: (0 == Detect All, 1 == Detect Enemies inside outer circle, 2 == Detect Enemies inside inner circle)
-    // Enemy Avoidance: (0 == Nearest Enemy/Enemies, 1 == Best Exit Angle from Enemies, 2 == Circle Defense)
-        // 0 == Small Exit Angle, 1 == Medium Exit Angle, 2 == Large Exit Angle
-    // Location Management: 0 == Don't Manage,
-    //                      1 == Inner Circle (Stay toward center of map),
-    //                      2 == Mid Circle (Stay betwen the edge and center of map)
-    //                      3 == Outer Circle (Stay near the edge of the map)
-    // Food Detection: (0 == Combination of distance and size, 1 == Distance, 2 == Size)
-    // arcSize: (1-16)
-    // foodAccelSize: (10-120)
-    // foodAccelAngle: (1-16)
-    // foodRoundSize: (3-15)
-    // foodRoundAngle: (1-16)
-    // foodSmallSize: (1-50)
-    // rearHeadAngle: (1-10), (1-10)
-    // rearHeadDir: (1-10)
-
-    // Food Ignored:
-    // Movement:
-    // Turn Angle:
-    // Speed Management:
-
-    // bot.opt: {
-    //     // These are the bot's default options
-    //     // If you wish to customise these, use
-    //     // customBotOptions above
-    //     arcSize: Math.PI / 8,
-    //     foodAccelSize: 60,
-    //     foodAccelAngle: Math.PI / 3,
-    //     foodRoundSize: 5,
-    //     foodRoundAngle: Math.PI / 8,
-    //     foodSmallSize: 10,
-    //     rearHeadAngle: 3 * Math.PI / 4,  //
-    //     rearHeadDir: Math.PI / 2,
-    // }
-
-    userInterface.chromosomeSetup('01000101010000');
+    chromosome = ''
+    for (var i = 0; i < 55; i++) {
+        num = Math.floor(Math.random()*(1-0+1)+0);
+        chromosome += num.toString();
+    }
+    userInterface.chromosomeSetup(chromosome);
 
     // Start!
     userInterface.oefTimer();
