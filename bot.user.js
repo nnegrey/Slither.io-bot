@@ -6,6 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ==UserScript==
 // @name         TEST_Slither.io-bot
+// @require http://code.jquery.com/jquery-1.12.4.min.js
 // @namespace    http://slither.io/
 // @version      1.2.9
 // @description  Slither.io bot
@@ -54,7 +55,42 @@ var customBotOptions = {
 };
 
 // gimme dat jquery
-// var $ = unsafeWindow.jQuery;
+var $ = window.jQuery;
+
+function makeid() {
+   var text = "";
+   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+   for( var i=0; i < 5; i++ )
+   text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+   return text;
+}
+
+var myId = makeid();
+
+
+function writeToDb(msgObject) {
+   var funData = {
+     message: JSON.stringify(msgObject),
+     botId: myId
+  };
+
+  $.ajax({
+    type: "POST",
+    processData: false,
+    contentType: 'application/json',
+    url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
+    data: JSON.stringify(funData),
+    success: function() {
+      console.log("WE DID IT LADS");
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        console.error( "OH NO AJAX ERROR: ", textStatus, errorThrown);
+    },
+  });
+}
+>>>>>>> 0ecbde548f5afbdb1422d0cd257f2312e50d422c
 
 // Custom logging function - disabled by default
 window.log = function() {
@@ -844,7 +880,7 @@ var bot = window.bot = (function() {
                                 window.setAcceleration(1);
                                 return true;
                             }
-                            
+
                         }
                     }
                 }
@@ -1448,10 +1484,10 @@ var userInterface = window.userInterface = (function() {
             statsOverlay.style.top = '340px';
             statsOverlay.style.width = '140px';
             statsOverlay.style.height = '210px';
-            // statsOverlay.style.background = 'rgba(0, 0, 0, 0.5)';
+            statsOverlay.style.background = 'rgba(0, 0, 0, 0.5)';
             statsOverlay.style.color = '#C0C0C0';
             statsOverlay.style.fontFamily = 'Consolas, Verdana';
-            statsOverlay.style.zIndex = 998;
+            statsOverlay.style.zIndex = 1998;
             statsOverlay.style.fontSize = '14px';
             statsOverlay.style.padding = '5px';
             statsOverlay.style.borderRadius = '5px';
@@ -1787,6 +1823,7 @@ var userInterface = window.userInterface = (function() {
         },
 
         chromosomeSetup: function(chromosome) {
+            window.globalChromosome = chromosome;
             // Start Circle Size:
             circleSize = parseInt(chromosome.substring(0, 2), 2);
             if (circleSize == 0) { // 0 == Small
@@ -1888,15 +1925,20 @@ var userInterface = window.userInterface = (function() {
             if (window.playing && bot.isBotEnabled && window.snake !== null) {
                 window.onmousemove = function() {};
                 bot.isBotRunning = true;
+                window.shouldUpdateStats = true;
                 bot.go();
             } else if (bot.isBotEnabled && bot.isBotRunning) {
                 bot.isBotRunning = false;
-                if (window.lastscore && window.lastscore.childNodes[1]) {
-                    bot.scores.push(parseInt(window.lastscore.childNodes[1].innerHTML));
+                if (window.lastscore && window.lastscore.childNodes[1] && window.shouldUpdateStats) {
+                    var lastScore = parseInt(window.lastscore.childNodes[1].innerHTML);
+                    bot.scores.push(lastScore);
                     bot.scores.sort(function(a, b) {
                         return b - a;
                     });
                     userInterface.updateStats();
+                    window.shouldUpdateStats = false;
+                    console.log("AHAHAHA YOU DEAD");
+                    writeToDb({chromosome: window.chromosome, score: lastScore})
                 }
 
                 if (window.autoRespawn) {
