@@ -1,18 +1,20 @@
 // Tutorial I found: https://www.tutorialspoint.com/genetic_algorithms/index.htm
 // 1. Generate a random population of size n (we'll do 1000)
-population = [1000][56];
+population = [1000];
 
 // Generate 1000 55 bit strings of 0s or 1s.
-for (i = 0; i < 1000; i++) {
+for (var i = 0; i < 1000; i++) {
+   chromosome = ''
    for (var j = 0; j < 55; j++) {
       num = Math.floor(Math.random()*(1-0+1)+0);
-      population[i][j] = (char) num;
+      chromosome += num.toString();
    }
-   population[i][j] = '\0';
+   population[i] = chromosome;
 }
 
 // 2. Store these strings into the DB indexed by 0-1000
 // 3. Server maintains index into population, start at 0.
+global_index = 0;
 // 4. The web browsers request a chromosome string from the server
 // 5. Server responds with current index and chromosome (increment index)
 // 6. Bot runs chromosome.
@@ -20,9 +22,10 @@ for (i = 0; i < 1000; i++) {
 // 8. Server stores info.
 // 9. Once every chromosome has a fitness score
 // 9a. Get sum of all scores from DB.
+population_sum = 0;
 // 9b. create new temp population of size 1000.
-population = [1000][56];
-for (i = 0; i < 1000; i++) {
+population = [1000];
+for (var i = 0; i < 1000; i++) {
    // 9c. Choose a random number between 0 and the sum of scores
    random_num_1 = Math.floor(Math.random()*(population_sum-0+population_sum)+0);
    random_num_2 = Math.floor(Math.random()*(population_sum-0+population_sum)+0);
@@ -50,9 +53,12 @@ for (i = 0; i < 1000; i++) {
    // 11. Mutation (Chance of mutation 1%)
    for (j = 0; j < 55; j++) {
       if (Math.floor(Math.random()*(100-0+100)+0) == 0) {
-         // Flip 0 to 1
-         // or
-         // Flip 1 to 0
+         if (chromosome.charAt(j) == '0') { // Flip 0 to 1
+            chromosome = chromosome.substring(0, j) + '1' + chromosome.substring(j+1, character.length);
+         }
+         else { // Flip 1 to 0
+            chromosome[j] = chromosome.substring(0, j) + '0' + chromosome.substring(j+1, character.length);
+         }
       }
    }
 
