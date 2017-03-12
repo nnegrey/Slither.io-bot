@@ -90,7 +90,6 @@ function writeToDb(msgObject) {
     },
   });
 }
->>>>>>> 0ecbde548f5afbdb1422d0cd257f2312e50d422c
 
 // Custom logging function - disabled by default
 window.log = function() {
@@ -224,14 +223,14 @@ var canvasUtil = window.canvasUtil = (function() {
             // Scaling ratio
             if (window.gsc) {
                 window.gsc *= Math.pow(0.9, e.wheelDelta / -120 || e.detail / 2 || 0);
-                // window.desired_gsc = window.gsc;
-        //     }
-        // },
+                window.desired_gsc = window.gsc;
+            }
+        },
 
-        // // Restores zoom to the default value.
-        // resetZoom: function() {
-        //     window.gsc = 0.9;
-        //     window.desired_gsc = 0.9;
+        // Restores zoom to the default value.
+        resetZoom: function() {
+            window.gsc = 0.9;
+            window.desired_gsc = 0.9;
         },
 
         // Maintains Zoom
