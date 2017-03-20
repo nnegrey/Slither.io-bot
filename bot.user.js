@@ -521,9 +521,9 @@ var bot = window.bot = (function() {
                     bot.collisionPoints[i].radius
                 );
 
-                if (canvasUtil.circleIntersect(headCircle, collisionCircle) ||
-                    (bot.LimitEnemies <= 1 && canvasUtil.circleIntersect(headCircle, collisionCircle)) ||
-                    (bot.LimitEnemies == 0)) {
+                if (bot.LimitEnemies == 0 ||
+                        (bot.LimitEnemies == 1 && canvasUtil.circleIntersect(fullHeadCircle, collisionCircle)) ||
+                        (bot.LimitEnemies == 2 && canvasUtil.circleIntersect(headCircle, collisionCircle))) {
                     bot.changeHeading(1 * Math.PI);
                     return true;
                 }
