@@ -1935,20 +1935,22 @@ var userInterface = window.userInterface = (function() {
                     userInterface.updateStats();
                     window.shouldUpdateStats = false;
                     console.log("AHAHAHA YOU DEAD");
-                    writeToDb({score: lastScore, botId: window.myId})
+
+                    var prevChrom = window.globalChromosome;
+
+                    $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
+                    .done(function(newChromosome) {
+                       userInterface.chromosomeSetup(newChromosome.chromosome);
+                       window.lastId = newChromosome.id;
+                       window.connect();
+                    });
+
+                    writeToDb({score: lastScore, id: window.lastId, botId: window.myId, chromosome: prevChrom});
                 }
 
                 if (window.autoRespawn) {
-                    // RESET BEHAVIOR to new chromosome
-                    chromosome = ''
-                    for (var i = 0; i < 55; i++) {
-                        num = Math.floor(Math.random()*(1-0+1)+0);
-                        chromosome += num.toString();
-                    }
+                    // Get new chromosome from server
 
-                    // userInterface.chromosomeSetup('01000101010000');
-                    userInterface.chromosomeSetup(chromosome);
-                    window.connect();
                 }
             }
 
@@ -2070,13 +2072,13 @@ var userInterface = window.userInterface = (function() {
     // Maintain fps
     setInterval(userInterface.framesPerSecond.fpsTimer, 80);
 
-    chromosome = ''
-    for (var i = 0; i < 55; i++) {
-        num = Math.floor(Math.random()*(1-0+1)+0);
-        chromosome += num.toString();
-    }
-    userInterface.chromosomeSetup(chromosome);
+    // Get initial chromosome
 
-    // Start!
-    userInterface.oefTimer();
+    $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
+    .done(function(newChromosome) {
+      userInterface.chromosomeSetup(newChromosome.chromosome);
+      window.lastId = newChromosome.id;
+      // Start!
+      userInterface.oefTimer();
+    });
 })();
