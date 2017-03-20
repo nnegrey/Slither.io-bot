@@ -544,6 +544,7 @@ var bot = window.bot = (function() {
                     y: a_y
                 };
                 canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
+                bot.OLD_DISTANCE = distance;
                 return true;
             }
             else if ((bot.LOCATION_MANAGEMENT == 2 && distance < 7625) || (bot.LOCATION_MANAGEMENT == 3 && distance < 15250)) {
@@ -552,6 +553,7 @@ var bot = window.bot = (function() {
                     y: a_y + r * ((snake_y - a_y) / Math.sqrt(Math.pow(snake_x - a_x, 2) + Math.pow(snake_y - a_y, 2)))
                 };
                 canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
+                bot.OLD_DISTANCE = distance;
                 return true;
             }
             return false;
@@ -1372,8 +1374,28 @@ var bot = window.bot = (function() {
                         bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
                 }
             }
+            else if (bot.moveAwayFromEdge) {
+                bot.lookForFood = false;
+
+                a_x = 45750 / 2.0;
+                a_y = 45750 / 2.0;
+                r = 45750 / 2.0;
+                snake_x = window.snake.xx;
+                snake_y = window.snake.yy;
+
+                distance = Math.sqrt(canvasUtil.getDistance2(snake_x, snake_y, a_x, a_y));
+                if (Math.abs(bot.OLD_DISTANCE - distance) > 400) {
+                    bot.moveAwayFromEdge = false;
+                }
+                if (bot.foodTimeout) {
+                    window.clearTimeout(bot.foodTimeout);
+                    bot.foodTimeout = window.setTimeout(
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                }
+            }
             else if (bot.retreatToTargetRing()) {
                 bot.lookForFood = false;
+                bot.moveAwayFromEdge = true; 
                 if (bot.foodTimeout) {
                     window.clearTimeout(bot.foodTimeout);
                     bot.foodTimeout = window.setTimeout(
@@ -1822,6 +1844,7 @@ var userInterface = window.userInterface = (function() {
         },
 
         chromosomeSetup: function(chromosome) {
+            bot.moveAwayFromEdge = false;
             window.globalChromosome = chromosome;
             // Start Circle Size:
             circleSize = parseInt(chromosome.substring(0, 2), 2);
@@ -1940,14 +1963,14 @@ var userInterface = window.userInterface = (function() {
 
                     var prevChrom = window.globalChromosome;
 
-                    $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
-                    .done(function(newChromosome) {
-                       userInterface.chromosomeSetup(newChromosome.chromosome);
-                       window.lastId = newChromosome.id;
-                       window.connect();
-                    });
+                    // $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
+                    // .done(function(newChromosome) {
+                    //    userInterface.chromosomeSetup(newChromosome.chromosome);
+                    //    window.lastId = newChromosome.id;
+                    //    window.connect();
+                    // });
 
-                    writeToDb({score: lastScore, id: window.lastId, botId: window.myId, chromosome: prevChrom});
+                    // writeToDb({score: lastScore, id: window.lastId, botId: window.myId, chromosome: prevChrom});
                 }
 
                 if (window.autoRespawn) {
@@ -2076,11 +2099,13 @@ var userInterface = window.userInterface = (function() {
 
     // Get initial chromosome
 
-    $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
-    .done(function(newChromosome) {
-      userInterface.chromosomeSetup(newChromosome.chromosome);
-      window.lastId = newChromosome.id;
-      // Start!
-      userInterface.oefTimer();
-    });
+    // $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
+    // .done(function(newChromosome) {
+    //   userInterface.chromosomeSetup(newChromosome.chromosome);
+    //   window.lastId = newChromosome.id;
+    //   // Start!
+    //   userInterface.oefTimer();
+    // });
+    userInterface.chromosomeSetup('0100010101110010000111100100010001000001010100010001000');
+    userInterface.oefTimer();
 })();
