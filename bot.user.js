@@ -1963,14 +1963,14 @@ var userInterface = window.userInterface = (function() {
 
                     var prevChrom = window.globalChromosome;
 
-                    // $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
-                    // .done(function(newChromosome) {
-                    //    userInterface.chromosomeSetup(newChromosome.chromosome);
-                    //    window.lastId = newChromosome.id;
-                    //    window.connect();
-                    // });
+                    $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
+                    .done(function(newChromosome) {
+                       userInterface.chromosomeSetup(newChromosome.chromosome);
+                       window.lastId = newChromosome.id;
+                       window.connect();
+                    });
 
-                    // writeToDb({score: lastScore, id: window.lastId, botId: window.myId, chromosome: prevChrom});
+                    writeToDb({score: lastScore, id: window.lastId, botId: window.myId, chromosome: prevChrom});
                 }
 
                 if (window.autoRespawn) {
@@ -2099,13 +2099,13 @@ var userInterface = window.userInterface = (function() {
 
     // Get initial chromosome
 
-    // $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
-    // .done(function(newChromosome) {
-    //   userInterface.chromosomeSetup(newChromosome.chromosome);
-    //   window.lastId = newChromosome.id;
-    //   // Start!
-    //   userInterface.oefTimer();
-    // });
-    userInterface.chromosomeSetup('0100010101110010000111100100010001000001010100010001000');
-    userInterface.oefTimer();
+    $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
+    .done(function(newChromosome) {
+      userInterface.chromosomeSetup(newChromosome.chromosome);
+      window.lastId = newChromosome.id;
+      // Start!
+      userInterface.oefTimer();
+    });
+    // userInterface.chromosomeSetup('0100010101110010000111100100010001000001010100010001000');
+    // userInterface.oefTimer();
 })();
