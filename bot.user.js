@@ -71,13 +71,11 @@ var myId = makeid();
 
 
 function writeToDb(msgObject) {
-   var funData = {
-     message: JSON.stringify(msgObject),
-     botId: myId
-  };
+   var funData = msgObject;
+  funData.botId = myId;
 
   $.ajax({
-    type: "POST",
+    type: "PUT",
     processData: false,
     contentType: 'application/json',
     url: "https://nameless-plateau-25323.herokuapp.com/logEntry",
@@ -1937,7 +1935,7 @@ var userInterface = window.userInterface = (function() {
                     userInterface.updateStats();
                     window.shouldUpdateStats = false;
                     console.log("AHAHAHA YOU DEAD");
-                    writeToDb({chromosome: window.chromosome, score: lastScore})
+                    writeToDb({score: lastScore, botId: window.myId})
                 }
 
                 if (window.autoRespawn) {
