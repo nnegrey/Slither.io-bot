@@ -1148,10 +1148,12 @@ var bot = window.bot = (function() {
                         } else {
                             window.setAcceleration(bot.defaultAccel);
                         }
-                        bot.avoidHeadPoint({
-                            xx: window.snakes[bot.collisionPoints[i].snake].xx,
-                            yy: window.snakes[bot.collisionPoints[i].snake].yy
-                        });
+                        if (window.snakes[bot.collisionPoints[i].snake] && window.snakes[bot.collisionPoints[i].snake]) {
+                           bot.avoidHeadPoint({
+                               xx: window.snakes[bot.collisionPoints[i].snake].xx,
+                               yy: window.snakes[bot.collisionPoints[i].snake].yy
+                           });
+                        }
                         return true;
                     }
                 }
