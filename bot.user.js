@@ -1136,35 +1136,40 @@ var bot = window.bot = (function() {
 
                 // snake -1 is special case for non snake object.
                 if (bot.LimitEnemies <= 1 && bot.collisionPoints[i].snake !== -1) {
-                    var enemyHeadCircle = canvasUtil.circle(
+                   if (window.snakes[bot.collisionPoints[i].snake] !== undefined && window.snakes[bot.collisionPoints[i].snake] !== undefined) {
+
+                      var enemyHeadCircle = canvasUtil.circle(
                         window.snakes[bot.collisionPoints[i].snake].xx,
                         window.snakes[bot.collisionPoints[i].snake].yy,
                         bot.collisionPoints[i].radius
-                    );
+                     );
 
-                    if (canvasUtil.circleIntersect(fullHeadCircle, enemyHeadCircle)) {
+                     if (canvasUtil.circleIntersect(fullHeadCircle, enemyHeadCircle)) {
                         if (window.snakes[bot.collisionPoints[i].snake].sp > 10) {
-                            window.setAcceleration(1);
+                           window.setAcceleration(1);
                         } else {
-                            window.setAcceleration(bot.defaultAccel);
+                           window.setAcceleration(bot.defaultAccel);
                         }
-                        if (window.snakes[bot.collisionPoints[i].snake] && window.snakes[bot.collisionPoints[i].snake]) {
+                        if (window.snakes[bot.collisionPoints[i].snake] !== undefined && window.snakes[bot.collisionPoints[i].snake] !== undefined) {
                            bot.avoidHeadPoint({
-                               xx: window.snakes[bot.collisionPoints[i].snake].xx,
-                               yy: window.snakes[bot.collisionPoints[i].snake].yy
+                              xx: window.snakes[bot.collisionPoints[i].snake].xx,
+                              yy: window.snakes[bot.collisionPoints[i].snake].yy
                            });
                         }
                         return true;
-                    }
-                }
+                     }
+                  }
+               }
 
                 if (bot.LimitEnemies == 0) {
-                    bot.avoidHeadPoint({
+                   if (window.snakes[bot.collisionPoints[i].snake] !== undefined && window.snakes[bot.collisionPoints[i].snake] !== undefined) {
+                      bot.avoidHeadPoint({
                         xx: window.snakes[bot.collisionPoints[i].snake].xx,
                         yy: window.snakes[bot.collisionPoints[i].snake].yy
-                    });
-                    return true;
-                }
+                     });
+                  }
+                  return true;
+               }
             }
             window.setAcceleration(bot.defaultAccel);
             return false;
