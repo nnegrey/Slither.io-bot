@@ -1,9 +1,9 @@
 // Tutorial I found: https://www.tutorialspoint.com/genetic_algorithms/index.htm
-// 1. Generate a random population of size n (we'll do 1000)
-population = [1000];
+// 1. Generate a random population of size n (we'll do 50)
+population = [50];
 
-// Generate 1000 55 bit strings of 0s or 1s.
-for (var i = 0; i < 1000; i++) {
+// Generate 50 55 bit strings of 0s or 1s.
+for (var i = 0; i < 50; i++) {
    chromosome = ''
    for (var j = 0; j < 55; j++) {
       num = Math.floor(Math.random()*(1-0+1)+0);
@@ -12,7 +12,7 @@ for (var i = 0; i < 1000; i++) {
    population[i] = chromosome;
 }
 
-// 2. Store these strings into the DB indexed by 0-1000
+// 2. Store these strings into the DB indexed by 0-50
 // 3. Server maintains index into population, start at 0.
 global_index = 0;
 // 4. The web browsers request a chromosome string from the server
@@ -23,9 +23,9 @@ global_index = 0;
 // 9. Once every chromosome has a fitness score
 // 9a. Get sum of all scores from DB.
 population_sum = 0;
-// 9b. create new temp population of size 1000.
-population = [1000];
-for (var i = 0; i < 1000; i++) {
+// 9b. create new temp population of size 50.
+population = [50];
+for (var i = 0; i < 50; i++) {
    // 9c. Choose a random number between 0 and the sum of scores
    random_num_1 = Math.floor(Math.random()*(population_sum-0+population_sum)+0);
    random_num_2 = Math.floor(Math.random()*(population_sum-0+population_sum)+0);
