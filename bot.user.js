@@ -538,6 +538,11 @@ var bot = window.bot = (function() {
 
             distance = Math.sqrt(canvasUtil.getDistance2(snake_x, snake_y, a_x, a_y));
 
+            var end = {
+                x: window.snake.xx + 2000 * bot.cos,
+                y: window.snake.yy + 2000 * bot.sin
+            };
+
             if ((bot.LOCATION_MANAGEMENT == 1 && distance > 7625) || (bot.LOCATION_MANAGEMENT == 2 && distance > 15250)) {
                 window.goalCoordinates = {
                     x: a_x,
@@ -545,8 +550,16 @@ var bot = window.bot = (function() {
                 };
                 canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
                 bot.OLD_DISTANCE = distance;
+                if (window.visualDebugging) {
+                   canvasUtil.drawLine({
+                      x: window.snake.xx,
+                      y: window.snake.yy
+                   },
+                   end,
+                   'purple', 10);
+                }
                 return true;
-            }
+             }
             else if ((bot.LOCATION_MANAGEMENT == 2 && distance < 7625) || (bot.LOCATION_MANAGEMENT == 3 && distance < 15250)) {
                 window.goalCoordinates = {
                     x: a_x + r * ((snake_x - a_x) / Math.sqrt(Math.pow(snake_x - a_x, 2) + Math.pow(snake_y - a_y, 2))),
@@ -554,6 +567,15 @@ var bot = window.bot = (function() {
                 };
                 canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
                 bot.OLD_DISTANCE = distance;
+                if (window.visualDebugging) {
+                   canvasUtil.drawLine({
+                      x: window.snake.xx,
+                      y: window.snake.yy
+                   },
+                   end,
+                   'purple', 10);
+                }
+                return true;
                 return true;
             }
             return false;
@@ -1366,7 +1388,7 @@ var bot = window.bot = (function() {
                 if (bot.foodTimeout) {
                     window.clearTimeout(bot.foodTimeout);
                     bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames, "encirclement");
                 }
             }
             else if ((bot.ENEMY_AVOIDANCE == 0 && bot.checkCollision()) ||
@@ -1376,7 +1398,7 @@ var bot = window.bot = (function() {
                 if (bot.foodTimeout) {
                     window.clearTimeout(bot.foodTimeout);
                     bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames, "enemy avoidance");
                 }
             }
             else if (bot.moveAwayFromEdge) {
@@ -1395,7 +1417,7 @@ var bot = window.bot = (function() {
                 if (bot.foodTimeout) {
                     window.clearTimeout(bot.foodTimeout);
                     bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames, "edge fear");
                 }
             }
             else if (bot.retreatToTargetRing()) {
@@ -1415,14 +1437,15 @@ var bot = window.bot = (function() {
                 bot.lookForFood = true;
                 if (bot.foodTimeout === undefined) {
                     bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames, "nothing else to do");
                 }
                 window.setAcceleration(bot.foodAccel());
             }
         },
 
         // Timer version of food check
-        foodTimer: function() {
+        foodTimer: function(source) {
+            console.log("It's TIME for a food check hahahaha from", source);
             if (window.playing && bot.lookForFood &&
                 window.snake !== null && window.snake.alive_amt === 1) {
                 bot.computeFoodGoal();
