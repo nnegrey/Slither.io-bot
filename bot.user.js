@@ -530,6 +530,14 @@ var bot = window.bot = (function() {
         },
 
         retreatToTargetRing: function() {
+           if (window.retreatCooldown > Date.now()) {
+             console.log("You don't get to retreat just yet.");
+             return false;
+          }
+          var t = new Date();
+          t.setSeconds(t.getSeconds() + 30);
+          window.retreatCooldown = t;
+
             a_x = 45750 / 2.0;
             a_y = 45750 / 2.0;
             r = 45750 / 2.0;
@@ -556,7 +564,7 @@ var bot = window.bot = (function() {
                       y: window.snake.yy
                    },
                    end,
-                   'purple', 10);
+                   '#FFFF00', 10);
                 }
                 return true;
              }
@@ -2126,6 +2134,7 @@ var userInterface = window.userInterface = (function() {
     setInterval(userInterface.framesPerSecond.fpsTimer, 80);
 
     // Get initial chromosome
+    window.retreatCooldown = Date.now();
 
     $.getJSON("https://nameless-plateau-25323.herokuapp.com/chromosomeToScore")
     .done(function(newChromosome) {
