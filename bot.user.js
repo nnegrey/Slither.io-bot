@@ -535,7 +535,7 @@ var bot = window.bot = (function() {
              return false;
           }
           var t = new Date();
-          t.setSeconds(t.getSeconds() + 30);
+          t.setSeconds(t.getSeconds() + 5);
           window.retreatCooldown = t;
 
             a_x = 45750 / 2.0;
