@@ -1400,12 +1400,12 @@ var bot = window.bot = (function() {
             }
             else if (bot.retreatToTargetRing()) {
                 bot.lookForFood = false;
-                bot.moveAwayFromEdge = true; 
-                if (bot.foodTimeout) {
-                    window.clearTimeout(bot.foodTimeout);
-                    bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
-                }
+                bot.moveAwayFromEdge = true;
+               //  if (bot.foodTimeout) {
+               //      window.clearTimeout(bot.foodTimeout);
+               //      bot.foodTimeout = window.setTimeout(
+               //          bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+               //  }
             }
             else if (bot.attackNearestEnemyBehavior) {
                 bot.attackNearestEnemy();
